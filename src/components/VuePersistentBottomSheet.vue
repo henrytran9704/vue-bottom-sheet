@@ -1,6 +1,13 @@
 <template>
   <Teleport to="body">
-    <div class="bottom-sheet" ref="bottomSheet" :aria-hidden="!showSheet" role="dialog">
+  
+    <div
+      class="bottom-sheet"
+      v-bind="$attrs"
+      ref="bottomSheet"
+      :aria-hidden="!showSheet"
+      role="dialog"
+    >  
       <transition>
         <div
           @click="clickOnOverlayHandler"
@@ -10,7 +17,10 @@
       </transition>
       <div ref="bottomSheetContent" :class="sheetContentClasses">
         <header ref="bottomSheetHeader" class="bottom-sheet__header">
-          <div class="bottom-sheet__draggable-area" ref="bottomSheetDraggableArea">
+          <div
+            class="bottom-sheet__draggable-area"
+            ref="bottomSheetDraggableArea"
+          >
             <div class="bottom-sheet__draggable-thumb"></div>
           </div>
           <slot name="header" />
@@ -27,9 +37,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, onMounted, nextTick, ref, watch } from 'vue'
 import Hammer from 'hammerjs'
 
+type Position = 'hide' | 'middle' | 'full'
 /**
  * Bottom sheet props interface
  */
@@ -41,6 +52,8 @@ interface IProps {
   transitionDuration?: number
   overlayClickClose?: boolean
   canSwipe?: boolean
+  height?: Position
+  classStyle?: string
 }
 
 /**
@@ -50,7 +63,7 @@ interface IEvent {
   type: string
   deltaY: number
   isFinal: boolean
-  cancelable: boolean
+  cancelable?: boolean
 }
 
 /**
@@ -62,7 +75,8 @@ const props = withDefaults(defineProps<IProps>(), {
   maxWidth: 640,
   transitionDuration: 0.5,
   overlayClickClose: true,
-  canSwipe: true
+  canSwipe: true,
+  height: 'hide'
 })
 
 /**
@@ -73,7 +87,7 @@ const emit = defineEmits(['opened', 'closed', 'dragging-up', 'dragging-down'])
 /**
  * Show or hide sheet
  */
-const showSheet = ref(false)
+const showSheet = ref(true)
 
 /**
  * Sheet height value
@@ -83,7 +97,7 @@ const sheetHeight = ref(0)
 /**
  * Dynamic translate value
  */
-const translateValue = ref(100)
+const translateValue = ref(80)
 
 /**
  * Flag to check if sheet is being dragged
@@ -104,7 +118,25 @@ const bottomSheetMain = ref<HTMLElement | null>(null)
 const bottomSheetFooter = ref<HTMLElement | null>(null)
 const bottomSheetContent = ref<HTMLElement | null>(null)
 const bottomSheetDraggableArea = ref<HTMLElement | null>(null)
+const positionElm = ref<Position>(props.height)
+const positionElmHeight = ref<70 | 0 | 30>(70)
+const direction = ref(0)
 
+watch(
+  () => props.height,
+  () => {
+    showSheet.value = false
+    console.log('watching props.height')
+    isDragging.value = true
+    positionElm.value = props.height
+    positionToVh(positionElm.value)
+    isDragging.value = false
+    console.log(translateValue.value)
+
+    showSheet.value = true
+  },
+  { immediate: true }
+)
 /**
  * Close bottom sheet when escape key is pressed
  * @param element
@@ -127,7 +159,8 @@ const sheetContentClasses = computed(() => {
   return [
     'bottom-sheet__content',
     {
-      'bottom-sheet__content--fullscreen': sheetHeight.value >= window.innerHeight,
+      'bottom-sheet__content--fullscreen':
+        sheetHeight.value >= window.innerHeight,
       'bottom-sheet__content--dragging': isDragging.value
     }
   ]
@@ -144,7 +177,9 @@ const transitionDurationString = computed(() => {
  * Return sheet height string with px
  */
 const sheetHeightString = computed(() => {
-  return sheetHeight.value && sheetHeight.value > 0 ? `${sheetHeight.value + 1}px` : 'auto'
+  return sheetHeight.value && sheetHeight.value > 0
+    ? `${sheetHeight.value + 1}px`
+    : 'auto'
 })
 
 /**
@@ -186,49 +221,138 @@ const initHeight = async () => {
  */
 
 const dragHandler = (event: IEvent, type: 'area' | 'main') => {
+  console.log(
+    'dragHandler dragHandler dragHandler dragHandler dragHandler dragHandler'
+  )
   if (props.canSwipe) {
     isDragging.value = true
 
     const preventDefault = (e: Event) => {
       e.preventDefault()
     }
+    // console.log('event.deltaY')
+    // console.log(event.deltaY)
 
-    if (event.deltaY > 0) {
-      if (type === 'main' && event.type === 'panup') {
-        translateValue.value = pixelToVh(event.deltaY)
-        if (event.cancelable) {
-          bottomSheetMain.value!.addEventListener('touchmove', preventDefault)
-        }
-      }
+    // if (event.deltaY > 0) {
+    // if (type === 'main' && event.type === 'panup') {
+    //   translateValue.value = pixelToVh(event.deltaY)
+    //   if (event.cancelable) {
+    //     bottomSheetMain.value!.addEventListener('touchmove', preventDefault)
+    //   }
+    // }
 
-      if (type === 'main' && event.type === 'pandown' && contentScroll.value === 0) {
-        translateValue.value = pixelToVh(event.deltaY)
-      }
+    // if (type === 'main' && event.type === 'pandown' && contentScroll.value === 0) {
+    //   translateValue.value = pixelToVh(event.deltaY)
+    // }
 
-      if (type === 'area') {
-        translateValue.value = pixelToVh(event.deltaY)
-      }
-
-      if (event.type === 'panup') {
-        emit('dragging-up')
-      }
-      if (event.type === 'pandown') {
-        emit('dragging-down')
-      }
+    if (type === 'area') {
+      translateValue.value = pixelToVh(event.deltaY)
     }
 
-    if (event.isFinal) {
-      bottomSheetMain.value!.removeEventListener('touchmove', preventDefault)
+    if (event.type === 'panup') {
+      emit('dragging-up')
+    }
+    if (event.type === 'pandown') {
+      emit('dragging-down')
+    }
+    // }
+
+    // console.log('translateValue.value')
+    // console.log(translateValue.value)
+
+    const a = event.type
+    if (a == 'panup' || a == 'pandown') {
+      // console.log('event.typexx')
+      // console.log(event.type)
+      direction.value = a == 'panup' ? 1 : -1
+    }
+
+    // console.log('event.type')
+    // console.log(event.type)
+    // console.log(event)
+    // console.log('direction.value')
+    // console.log(direction.value)
+
+    if (event.isFinal && direction.value === -1) {
+      console.log('handle down')
+      // bottomSheetMain.value!.removeEventListener('touchmove', preventDefault)
+      // direction.value = 0
+      const xx = translateValue.value
+      console.log(xx)
+
+      // if (type === 'main') {
+      //   contentScroll.value = bottomSheetMain.value!.scrollTop
+      // }
+      // <45 =0, >45 => 70
+      isDragging.value = false
+      if (xx < 10) {
+        translateValue.value = 0
+        positionElm.value = 'full'
+        bottomSheetMain.value?.setAttribute(
+          'style',
+          `height:${(props.maxHeight || 0) * (1 - 0) - 36}px`
+        )
+      }
+      if (xx >= 10) {
+        translateValue.value = 45
+        positionElm.value = 'middle'
+        bottomSheetMain.value?.setAttribute(
+          'style',
+          `height:${(props.maxHeight || 0) * (1 - 0.45) - 36}px`
+        )
+      }
+      if (xx > 45) {
+        translateValue.value = 85
+        positionElm.value = 'hide'
+        bottomSheetMain.value?.setAttribute(
+          'style',
+          `height:${(props.maxHeight || 0) * (1 - 0.85) - 36}px`
+        )
+      }
+      event.deltaY = 0
+
+      console.log('after')
+      console.log(translateValue.value)
+    }
+
+    if (event.isFinal && direction.value === 1) {
+      console.log('handle upd')
+
+      // bottomSheetMain.value!.removeEventListener('touchmove', preventDefault)
+      // direction.value = 0
 
       if (type === 'main') {
         contentScroll.value = bottomSheetMain.value!.scrollTop
       }
+      // <45 =0, >45 => 70
       isDragging.value = false
-      if (translateValue.value >= 10) {
-        close()
-      } else {
+      // if (translateValue.value <70) {
+      //   console.log('1d');
+
+      //   translateValue.value = 45
+      //   positionElm.value = 1
+      // }
+      // console.log('alo??')
+      // console.log(translateValue.value)
+      const xx = translateValue.value
+      if (xx < 45) {
+        // console.log('3d================================')
         translateValue.value = 0
+        positionElm.value = 'full'
+        bottomSheetMain.value?.setAttribute(
+          'style',
+          `height:${(props.maxHeight || 0) * (1 - 0) - 36}px`
+        )
+      } else if (xx < 85) {
+        // console.log('2d================================')
+        translateValue.value = 45
+        positionElm.value = 'middle'
+        bottomSheetMain.value?.setAttribute(
+          'style',
+          `height:${(props.maxHeight || 0) * (1 - 0.45) - 36}px`
+        )
       }
+      event.deltaY = 0
     }
   }
 }
@@ -242,15 +366,18 @@ nextTick(() => {
   /**
    * Create instances of Hammerjs
    */
-  const hammerAreaInstance = new Hammer(bottomSheetDraggableArea.value, {
-    inputClass: Hammer.TouchMouseInput,
-    recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
-  })
+  const hammerAreaInstance = new Hammer(
+    bottomSheetDraggableArea.value as HTMLElement,
+    {
+      inputClass: Hammer.TouchMouseInput,
+      recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
+    }
+  )
 
-  const hammerMainInstance = new Hammer(bottomSheetMain.value, {
-    inputClass: Hammer.TouchMouseInput,
-    recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
-  })
+  // const hammerMainInstance = new Hammer(bottomSheetMain.value as HTMLElement, {
+  //   inputClass: Hammer.TouchMouseInput,
+  //   recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
+  // })
 
   /**
    * Set events and handlers to hammerjs instances
@@ -259,20 +386,33 @@ nextTick(() => {
     dragHandler(e, 'area')
   })
 
-  hammerMainInstance.on('panstart panup pandown panend', (e: IEvent) => {
-    dragHandler(e, 'main')
-  })
+  // hammerMainInstance.on('panstart panup pandown panend', (e: IEvent) => {
+  //   dragHandler(e, 'main')
+  // })
 })
 
 /**
  * Open bottom sheet method
  */
 const open = () => {
-  translateValue.value = 0
-  document.documentElement.style.overflowY = 'hidden'
-  document.documentElement.style.overscrollBehavior = 'none'
+  // positionToVh(positionElm.value)
+
+  translateValue.value = 85
+
+  // document.documentElement.style.overflowY = 'hidden'
+  // document.documentElement.style.overscrollBehavior = 'none'
   showSheet.value = true
   emit('opened')
+}
+
+function positionToVh(heigth: Position) {
+  if (heigth == 'full') {
+    translateValue.value = 0
+  } else if (heigth == 'middle') {
+    translateValue.value = 45
+  } else {
+    translateValue.value = 85
+  }
 }
 
 /**
@@ -280,10 +420,10 @@ const open = () => {
  */
 const close = async () => {
   showSheet.value = false
-  translateValue.value = 100
+  translateValue.value = 85
   setTimeout(() => {
-    document.documentElement.style.overflowY = 'auto'
-    document.documentElement.style.overscrollBehavior = ''
+    // document.documentElement.style.overflowY = 'auto'
+    // document.documentElement.style.overscrollBehavior = ''
     emit('closed')
   }, props.transitionDuration * 1000)
 }
@@ -292,9 +432,11 @@ const close = async () => {
  * Click on overlay handler
  */
 const clickOnOverlayHandler = () => {
-  if (props.overlayClickClose) {
-    close()
-  }
+  console.log('clickOnOverlayHandler')
+
+  // if (props.overlayClickClose) {
+  //   close()
+  // }
 }
 
 /**
@@ -303,19 +445,44 @@ const clickOnOverlayHandler = () => {
  */
 const pixelToVh = (pixel: number) => {
   const height =
-    props.maxHeight && props.maxHeight <= sheetHeight.value ? props.maxHeight : sheetHeight.value
-  return (pixel / height) * 100
+    props.maxHeight && props.maxHeight <= sheetHeight.value
+      ? props.maxHeight
+      : sheetHeight.value
+
+  // console.log('{height}')
+  // console.log({ height })
+
+  let x = (pixel / height) * 100
+
+  if (positionElm.value == 'hide') {
+    x = x + 85
+  }
+  if (positionElm.value == 'middle') {
+    x = x + 45
+  }
+  if (positionElm.value == 'full') {
+    x = x + 0
+  }
+  if (x < 0) {
+    x = 0
+  }
+  return x
 }
 
 /**
  * Define public methods
  */
 defineExpose({ open, close })
+
+onMounted(() => {
+  // open()
+})
 </script>
 
 <style lang="scss" scoped>
 .bottom-sheet {
-  z-index: 99999;
+  pointer-events: none;
+  z-index: 99;
   display: flex;
   flex-direction: column;
   align-items: center;

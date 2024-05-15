@@ -156,7 +156,7 @@
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 import { ref } from 'vue'
-import VueBottomSheet from '@/VueBottomSheet.vue'
+import VueBottomSheet from '@/components/VuePersistentBottomSheet.vue'
 
 const overlay = ref(true)
 const maxWidth = ref(640)
@@ -164,13 +164,13 @@ const maxHeight = ref(640)
 const clickToClose = ref(true)
 const overlayColorSelect = ref('#0000004D')
 const canSwipe = ref(true)
-const myBottomSheet = ref(null)
+const myBottomSheet = ref<InstanceType<typeof VueBottomSheet>>()
 
 const open = () => {
-  myBottomSheet.value.open()
+  myBottomSheet.value?.open()
 }
 const close = () => {
-  myBottomSheet.value.close()
+  myBottomSheet.value?.close()
 }
 </script>
 <style>

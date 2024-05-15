@@ -1,13 +1,13 @@
 ![Example](https://bs.vaban.ru/logo.jpg)
 
 # Vue Bottom Sheet 
-![Size](https://img.shields.io/bundlephobia/minzip/@webzlodimir/vue-bottom-sheet)
-![Downloads](https://img.shields.io/npm/dt/@webzlodimir/vue-bottom-sheet)
-![Version](https://img.shields.io/npm/v/@webzlodimir/vue-bottom-sheet)
+## Fork from [@webzlodimir/vue-bottom-sheet](https://www.npmjs.com/package/@webzlodimir/vue-bottom-sheet) 
+
+![Size](https://img.shields.io/bundlephobia/minzip/vue3-bottom-sheet)
+![Downloads](https://img.shields.io/npm/dt/vue3-bottom-sheet)
+![Version](https://img.shields.io/npm/v/vue3-bottom-sheet)
 
 A nice clean and touch-friendly bottom sheet component based on [Vue.js](https://vuejs.org/) and [hammer.js](https://hammerjs.github.io/) for Vue 3
-
- - [Vue 2 Version](https://github.com/vaban-ru/vue-bottom-sheet-vue2) 
  - :clapper: [Demo](https://bs.vaban.ru/)
 
 ## Installation
@@ -15,13 +15,13 @@ A nice clean and touch-friendly bottom sheet component based on [Vue.js](https:/
 ### NPM
 
 ```
-npm install @webzlodimir/vue-bottom-sheet
+npm install vue3-bottom-sheet
 ```
 
 ### Yarn
 
 ```
-yarn add @webzlodimir/vue-bottom-sheet
+yarn add vue3-bottom-sheet
 ```
 
 ## Usage
@@ -38,8 +38,7 @@ yarn add @webzlodimir/vue-bottom-sheet
 </template>
 
 <script setup>
-import VueBottomSheet from "@webzlodimir/vue-bottom-sheet";
-import  "@webzlodimir/vue-bottom-sheet/dist/style.css";
+import { VueBottomSheet } from "vue3-bottom-sheet";
 import { ref } from "vue";
 
 const myBottomSheet = ref(null)
@@ -68,8 +67,7 @@ const close = () => {
 </template>
 
 <script setup lang="ts">
-import VueBottomSheet from "@webzlodimir/vue-bottom-sheet";
-import  "@webzlodimir/vue-bottom-sheet/dist/style.css";
+import { VueBottomSheet } from "vue3-bottom-sheet";
 import { ref } from "vue";
 
 const myBottomSheet = ref<InstanceType<typeof VueBottomSheet>>()
