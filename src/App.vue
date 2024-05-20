@@ -84,7 +84,7 @@
       :overlay="overlay"
       :can-swipe="canSwipe"
       :overlay-color="overlayColorSelect"
-      ref="myBottomSheet"
+      v-model="myBottomSheet"
     >
       <div class="sheet-content">
         <p>
@@ -234,7 +234,7 @@
 <script setup lang="ts">
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import VueBottomSheet from '@/components/VueBottomSheet.vue'
 import VuePersistentBottomSheet from '@/components/VuePersistentBottomSheet.vue'
 
@@ -244,7 +244,7 @@ const maxHeight = ref(640)
 const clickToClose = ref(true)
 const overlayColorSelect = ref('#0000004D')
 const canSwipe = ref(true)
-const myBottomSheet = ref<InstanceType<typeof VueBottomSheet>>()
+const myBottomSheet = ref<boolean>(false)
 
 
 const overlay2 = ref(false)
@@ -256,11 +256,18 @@ const canSwipe2 = ref(true)
 const myBottomSheet2 = ref<InstanceType<typeof VueBottomSheet>>()
 
 const open = () => {
-  myBottomSheet.value?.open()
+  myBottomSheet.value = true;
 }
 const close = () => {
-  myBottomSheet.value?.close()
+  myBottomSheet.value = false;
 }
+
+onMounted(() => {
+  // open()
+  // setTimeout(() => {    console.log('avcxxxx');
+
+  //   myBottomSheet.value=false }, 2000)
+})
 </script>
 <style>
 .sheet-content {

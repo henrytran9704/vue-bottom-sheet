@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Hammer from 'hammerjs'
 
 /**
@@ -75,7 +75,9 @@ const props = withDefaults(defineProps<IProps>(), {
 /**
  * Bottom sheet emit interface
  */
-const emit = defineEmits(['opened', 'closed', 'dragging-up', 'dragging-down'])
+const emit = defineEmits(['dragging-up', 'dragging-down'])
+
+const model = defineModel()
 
 /**
  * Show or hide sheet
@@ -275,23 +277,25 @@ nextTick(() => {
  * Open bottom sheet method
  */
 const open = () => {
+  model.value = true
+
   translateValue.value = 0
   document.documentElement.style.overflowY = 'hidden'
   document.documentElement.style.overscrollBehavior = 'none'
   showSheet.value = true
-  emit('opened')
 }
 
 /**
  * Close bottom sheet method
  */
 const close = async () => {
+  model.value = false
+
   showSheet.value = false
   translateValue.value = 100
   setTimeout(() => {
     document.documentElement.style.overflowY = 'auto'
     document.documentElement.style.overscrollBehavior = ''
-    emit('closed')
   }, props.transitionDuration * 1000)
 }
 
@@ -314,10 +318,13 @@ const pixelToVh = (pixel: number) => {
   return (pixel / height) * 100
 }
 
-/**
- * Define public methods
- */
-defineExpose({ open, close })
+watch(model, () => {
+  if (model.value) {
+    open()
+  } else {
+    close()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
