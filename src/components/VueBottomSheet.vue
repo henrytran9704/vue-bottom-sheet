@@ -316,7 +316,7 @@ defineExpose({ open, close })
 
 <style lang="scss" scoped>
 .bottom-sheet {
-  z-index: 99999;
+  z-index: 101;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -353,6 +353,7 @@ defineExpose({ open, close })
   }
 
   &__content {
+    box-shadow: 0px -2px 8px 0px #0000001a;
     display: flex;
     flex-direction: column;
     border-radius: 16px 16px 0 0;
@@ -367,7 +368,7 @@ defineExpose({ open, close })
     pointer-events: all;
 
     &--fullscreen {
-      border-radius: 0;
+      // border-radius: 0;
     }
 
     &:not(.bottom-sheet__content--dragging) {
@@ -375,17 +376,20 @@ defineExpose({ open, close })
     }
   }
 
-  &__draggable-area {
-    width: 100%;
-    margin: auto;
-    padding: 16px;
+  &__header {
     cursor: grab;
   }
 
+  &__draggable-area {
+    width: 100%;
+    margin: auto;
+    padding: 8px;
+  }
+
   &__draggable-thumb {
-    width: 40px;
-    height: 4px;
-    background: #333333;
+    width: 80px;
+    height: 3px;
+    background: #d9d9d9;
     border-radius: 8px;
     margin: 0 auto;
   }

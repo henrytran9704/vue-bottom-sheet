@@ -1,13 +1,12 @@
 <template>
   <Teleport to="body">
-  
     <div
       class="bottom-sheet"
       v-bind="$attrs"
       ref="bottomSheet"
       :aria-hidden="!showSheet"
       role="dialog"
-    >  
+    >
       <transition>
         <div
           @click="clickOnOverlayHandler"
@@ -17,10 +16,7 @@
       </transition>
       <div ref="bottomSheetContent" :class="sheetContentClasses">
         <header ref="bottomSheetHeader" class="bottom-sheet__header">
-          <div
-            class="bottom-sheet__draggable-area"
-            ref="bottomSheetDraggableArea"
-          >
+          <div class="bottom-sheet__draggable-area" ref="bottomSheetDraggableArea">
             <div class="bottom-sheet__draggable-thumb"></div>
           </div>
           <slot name="header" />
@@ -94,6 +90,8 @@ const showSheet = ref(true)
  */
 const sheetHeight = ref(0)
 
+const sheetHeaderHeight = ref(0)
+
 /**
  * Dynamic translate value
  */
@@ -108,6 +106,10 @@ const isDragging = ref(false)
  * Content scrolled value
  */
 const contentScroll = ref(0)
+
+const transitionDurationLocal = ref(0)
+
+const middlePoint = ref(false)
 
 /**
  * Refs to all sheet HTML elements
@@ -159,8 +161,7 @@ const sheetContentClasses = computed(() => {
   return [
     'bottom-sheet__content',
     {
-      'bottom-sheet__content--fullscreen':
-        sheetHeight.value >= window.innerHeight,
+      'bottom-sheet__content--fullscreen': sheetHeight.value >= window.innerHeight,
       'bottom-sheet__content--dragging': isDragging.value
     }
   ]
@@ -170,16 +171,14 @@ const sheetContentClasses = computed(() => {
  * Return transition duration value with seconds
  */
 const transitionDurationString = computed(() => {
-  return `${props.transitionDuration}s`
+  return `${transitionDurationLocal.value}s`
 })
 
 /**
  * Return sheet height string with px
  */
 const sheetHeightString = computed(() => {
-  return sheetHeight.value && sheetHeight.value > 0
-    ? `${sheetHeight.value + 1}px`
-    : 'auto'
+  return sheetHeight.value && sheetHeight.value > 0 ? `${sheetHeight.value + 1}px` : 'auto'
 })
 
 /**
@@ -193,7 +192,10 @@ const maxHeightString = computed(() => {
  * Return current translate value string with percents
  */
 const translateValueString = computed(() => {
-  return `${translateValue.value}%`
+  if (translateValue.value === 85) {
+    return `${sheetHeight.value - sheetHeaderHeight.value}px`
+  }
+  return `${(sheetHeight.value * translateValue.value) / 100}px`
 })
 
 /**
@@ -208,6 +210,7 @@ const maxWidthString = computed(() => {
  */
 const initHeight = async () => {
   await nextTick()
+  sheetHeaderHeight.value = bottomSheetHeader.value!.offsetHeight
   sheetHeight.value =
     bottomSheetHeader.value!.offsetHeight +
     bottomSheetMain.value!.clientHeight +
@@ -221,29 +224,12 @@ const initHeight = async () => {
  */
 
 const dragHandler = (event: IEvent, type: 'area' | 'main') => {
-  console.log(
-    'dragHandler dragHandler dragHandler dragHandler dragHandler dragHandler'
-  )
   if (props.canSwipe) {
     isDragging.value = true
 
     const preventDefault = (e: Event) => {
       e.preventDefault()
     }
-    // console.log('event.deltaY')
-    // console.log(event.deltaY)
-
-    // if (event.deltaY > 0) {
-    // if (type === 'main' && event.type === 'panup') {
-    //   translateValue.value = pixelToVh(event.deltaY)
-    //   if (event.cancelable) {
-    //     bottomSheetMain.value!.addEventListener('touchmove', preventDefault)
-    //   }
-    // }
-
-    // if (type === 'main' && event.type === 'pandown' && contentScroll.value === 0) {
-    //   translateValue.value = pixelToVh(event.deltaY)
-    // }
 
     if (type === 'area') {
       translateValue.value = pixelToVh(event.deltaY)
@@ -251,107 +237,90 @@ const dragHandler = (event: IEvent, type: 'area' | 'main') => {
 
     if (event.type === 'panup') {
       emit('dragging-up')
-    }
-    if (event.type === 'pandown') {
+    } else if (event.type === 'pandown') {
       emit('dragging-down')
     }
-    // }
-
-    // console.log('translateValue.value')
-    // console.log(translateValue.value)
 
     const a = event.type
     if (a == 'panup' || a == 'pandown') {
-      // console.log('event.typexx')
-      // console.log(event.type)
       direction.value = a == 'panup' ? 1 : -1
     }
 
-    // console.log('event.type')
-    // console.log(event.type)
-    // console.log(event)
-    // console.log('direction.value')
-    // console.log(direction.value)
-
+    // Drag down end
     if (event.isFinal && direction.value === -1) {
-      console.log('handle down')
-      // bottomSheetMain.value!.removeEventListener('touchmove', preventDefault)
-      // direction.value = 0
       const xx = translateValue.value
-      console.log(xx)
 
-      // if (type === 'main') {
-      //   contentScroll.value = bottomSheetMain.value!.scrollTop
-      // }
-      // <45 =0, >45 => 70
       isDragging.value = false
-      if (xx < 10) {
-        translateValue.value = 0
-        positionElm.value = 'full'
-        bottomSheetMain.value?.setAttribute(
-          'style',
-          `height:${(props.maxHeight || 0) * (1 - 0) - 36}px`
-        )
-      }
-      if (xx >= 10) {
-        translateValue.value = 45
-        positionElm.value = 'middle'
-        bottomSheetMain.value?.setAttribute(
-          'style',
-          `height:${(props.maxHeight || 0) * (1 - 0.45) - 36}px`
-        )
-      }
-      if (xx > 45) {
-        translateValue.value = 85
-        positionElm.value = 'hide'
-        bottomSheetMain.value?.setAttribute(
-          'style',
-          `height:${(props.maxHeight || 0) * (1 - 0.85) - 36}px`
-        )
-      }
-      event.deltaY = 0
 
-      console.log('after')
-      console.log(translateValue.value)
+      if (middlePoint.value) {
+        if (xx < 10) {
+          translateValue.value = 0
+          positionElm.value = 'full'
+          bottomSheetMain.value?.setAttribute(
+            'style',
+            `height:${(props.maxHeight || 0) * (1 - 0) - sheetHeaderHeight.value}px`
+          )
+        } else if (xx >= 10 && xx <= 45) {
+          translateValue.value = 45
+          positionElm.value = 'middle'
+          bottomSheetMain.value?.setAttribute(
+            'style',
+            `height:${(props.maxHeight || 0) * (1 - 0.45) - sheetHeaderHeight.value}px`
+          )
+        } else if (xx > 45) {
+          translateValue.value = 85
+          positionElm.value = 'hide'
+          bottomSheetMain.value?.setAttribute(
+            'style',
+            `height:${(props.maxHeight || 0) * (1 - 0.85) - sheetHeaderHeight.value}px`
+          )
+        }
+      } else {
+        if (xx < 10) {
+          translateValue.value = 0
+          positionElm.value = 'full'
+        } else if (xx >= 10) {
+          translateValue.value = 85
+          positionElm.value = 'hide'
+        }
+      }
+
+      event.deltaY = 0
     }
 
+    // Drag up end
     if (event.isFinal && direction.value === 1) {
-      console.log('handle upd')
-
-      // bottomSheetMain.value!.removeEventListener('touchmove', preventDefault)
-      // direction.value = 0
-
       if (type === 'main') {
         contentScroll.value = bottomSheetMain.value!.scrollTop
       }
-      // <45 =0, >45 => 70
-      isDragging.value = false
-      // if (translateValue.value <70) {
-      //   console.log('1d');
 
-      //   translateValue.value = 45
-      //   positionElm.value = 1
-      // }
-      // console.log('alo??')
-      // console.log(translateValue.value)
+      isDragging.value = false
+
       const xx = translateValue.value
-      if (xx < 45) {
-        // console.log('3d================================')
-        translateValue.value = 0
-        positionElm.value = 'full'
-        bottomSheetMain.value?.setAttribute(
-          'style',
-          `height:${(props.maxHeight || 0) * (1 - 0) - 36}px`
-        )
-      } else if (xx < 85) {
-        // console.log('2d================================')
-        translateValue.value = 45
-        positionElm.value = 'middle'
-        bottomSheetMain.value?.setAttribute(
-          'style',
-          `height:${(props.maxHeight || 0) * (1 - 0.45) - 36}px`
-        )
+
+      if (middlePoint.value) {
+        if (xx < 45) {
+          translateValue.value = 0
+          positionElm.value = 'full'
+          bottomSheetMain.value?.setAttribute(
+            'style',
+            `height:${(props.maxHeight || 0) * (1 - 0) - sheetHeaderHeight.value}px`
+          )
+        } else if (xx < 85) {
+          translateValue.value = 45
+          positionElm.value = 'middle'
+          bottomSheetMain.value?.setAttribute(
+            'style',
+            `height:${(props.maxHeight || 0) * (1 - 0.45) - sheetHeaderHeight.value}px`
+          )
+        }
+      } else {
+        if (xx < 85) {
+          translateValue.value = 0
+          positionElm.value = 'full'
+        }
       }
+
       event.deltaY = 0
     }
   }
@@ -366,13 +335,10 @@ nextTick(() => {
   /**
    * Create instances of Hammerjs
    */
-  const hammerAreaInstance = new Hammer(
-    bottomSheetDraggableArea.value as HTMLElement,
-    {
-      inputClass: Hammer.TouchMouseInput,
-      recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
-    }
-  )
+  const hammerAreaInstance = new Hammer(bottomSheetHeader.value as HTMLElement, {
+    inputClass: Hammer.TouchMouseInput,
+    recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
+  })
 
   // const hammerMainInstance = new Hammer(bottomSheetMain.value as HTMLElement, {
   //   inputClass: Hammer.TouchMouseInput,
@@ -425,7 +391,7 @@ const close = async () => {
     // document.documentElement.style.overflowY = 'auto'
     // document.documentElement.style.overscrollBehavior = ''
     emit('closed')
-  }, props.transitionDuration * 1000)
+  }, transitionDurationLocal.value * 1000)
 }
 
 /**
@@ -445,9 +411,7 @@ const clickOnOverlayHandler = () => {
  */
 const pixelToVh = (pixel: number) => {
   const height =
-    props.maxHeight && props.maxHeight <= sheetHeight.value
-      ? props.maxHeight
-      : sheetHeight.value
+    props.maxHeight && props.maxHeight <= sheetHeight.value ? props.maxHeight : sheetHeight.value
 
   // console.log('{height}')
   // console.log({ height })
@@ -476,13 +440,16 @@ defineExpose({ open, close })
 
 onMounted(() => {
   // open()
+  setTimeout(() => {
+    transitionDurationLocal.value = props.transitionDuration
+  }, 0)
 })
 </script>
 
 <style lang="scss" scoped>
 .bottom-sheet {
   pointer-events: none;
-  z-index: 99;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -519,6 +486,7 @@ onMounted(() => {
   }
 
   &__content {
+    box-shadow: 0px -2px 8px 0px #0000001a;
     display: flex;
     flex-direction: column;
     border-radius: 16px 16px 0 0;
@@ -533,7 +501,7 @@ onMounted(() => {
     pointer-events: all;
 
     &--fullscreen {
-      border-radius: 0;
+      // border-radius: 0;
     }
 
     &:not(.bottom-sheet__content--dragging) {
@@ -541,17 +509,20 @@ onMounted(() => {
     }
   }
 
-  &__draggable-area {
-    width: 100%;
-    margin: auto;
-    padding: 16px;
+  &__header {
     cursor: grab;
   }
 
+  &__draggable-area {
+    width: 100%;
+    margin: auto;
+    padding: 8px;
+  }
+
   &__draggable-thumb {
-    width: 40px;
-    height: 4px;
-    background: #333333;
+    width: 80px;
+    height: 3px;
+    background: #d9d9d9;
     border-radius: 8px;
     margin: 0 auto;
   }
