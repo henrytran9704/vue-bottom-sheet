@@ -1,6 +1,12 @@
 <template>
   <Teleport to="body">
-    <div class="bottom-sheet" ref="bottomSheet" :aria-hidden="!showSheet" role="dialog">
+    <div
+      class="bottom-sheet"
+      v-bind="$attrs"
+      ref="bottomSheet"
+      :aria-hidden="!showSheet"
+      role="dialog"
+    >
       <transition>
         <div
           @click="clickOnOverlayHandler"

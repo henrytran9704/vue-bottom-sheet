@@ -19,6 +19,7 @@
           <div class="bottom-sheet__draggable-area" ref="bottomSheetDraggableArea">
             <div class="bottom-sheet__draggable-thumb"></div>
           </div>
+
           <slot name="header" />
         </header>
         <main ref="bottomSheetMain" class="bottom-sheet__main">
