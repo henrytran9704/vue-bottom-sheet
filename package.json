@@ -1,6 +1,6 @@
 {
   "name": "vue3-bottom-sheet",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": false,
   "scripts": {
     "dev": "vite --config vite-demo.config.ts serve --host 0.0.0.0",
