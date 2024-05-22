@@ -154,7 +154,7 @@
       </div>
     </vue-bottom-sheet>
 
-    <vue-persistent-bottom-sheet
+    <VuePersistentBottomSheet
       :position="position"
       height="70vh"
       :overlay-click-close="clickToClose2"
@@ -185,7 +185,7 @@
       <template #footer>
         <div class="bottom-sheet__headerx">Thời gian footer</div>
       </template>
-    </vue-persistent-bottom-sheet>
+    </VuePersistentBottomSheet>
   </div>
 </template>
 

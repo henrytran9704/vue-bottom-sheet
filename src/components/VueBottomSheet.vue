@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import Hammer from 'hammerjs'
 
 /**
@@ -119,7 +119,7 @@ const bottomSheetDraggableArea = ref<HTMLElement | null>(null)
  * @param element
  */
 const isFocused = (element: HTMLElement) => document.activeElement === element
-window.addEventListener('keyup', (event: KeyboardEvent) => {
+function handleKeyUp(event: KeyboardEvent) {
   const isSheetElementFocused =
     bottomSheet.value!.contains(event.target as HTMLElement) &&
     isFocused(event.target as HTMLElement)
@@ -127,7 +127,7 @@ window.addEventListener('keyup', (event: KeyboardEvent) => {
   if (event.key === 'Escape' && !isSheetElementFocused) {
     close()
   }
-})
+}
 
 /**
  * Return all classes for bottom sheet content
@@ -278,6 +278,7 @@ nextTick(() => {
  */
 const open = () => {
   model.value = true
+  window.addEventListener('keyup', handleKeyUp)
 
   translateValue.value = 0
   document.documentElement.style.overflowY = 'hidden'
@@ -290,6 +291,7 @@ const open = () => {
  */
 const close = async () => {
   model.value = false
+  window.removeEventListener('keyup', handleKeyUp)
 
   showSheet.value = false
   translateValue.value = 100
@@ -324,6 +326,10 @@ watch(model, () => {
   } else {
     close()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keyup', handleKeyUp)
 })
 </script>
 

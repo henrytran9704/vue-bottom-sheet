@@ -142,20 +142,6 @@ watch(
   },
   { immediate: true }
 )
-/**
- * Close bottom sheet when escape key is pressed
- * @param element
- */
-const isFocused = (element: HTMLElement) => document.activeElement === element
-window.addEventListener('keyup', (event: KeyboardEvent) => {
-  const isSheetElementFocused =
-    bottomSheet.value!.contains(event.target as HTMLElement) &&
-    isFocused(event.target as HTMLElement)
-
-  if (event.key === 'Escape' && !isSheetElementFocused) {
-    close()
-  }
-})
 
 /**
  * Return all classes for bottom sheet content
@@ -181,7 +167,10 @@ const transitionDurationString = computed(() => {
  * Return sheet height string with px
  */
 const sheetHeightString = computed(() => {
-  return props.height ? `${props.height}` : 'auto'
+  if (props.height) {
+    return props.height
+  }
+  return sheetHeight.value && sheetHeight.value > 0 ? `${sheetHeight.value + 1}px` : 'auto'
 })
 
 /**
