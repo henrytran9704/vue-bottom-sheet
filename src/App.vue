@@ -40,9 +40,7 @@
             v-model="canSwipe"
             checked
           />
-          <label class="form-check-label" for="canSwipe"
-          >Enable swipe to close</label
-          >
+          <label class="form-check-label" for="canSwipe">Enable swipe to close</label>
         </div>
       </div>
       <div class="col-md-4 col-12">
@@ -75,7 +73,9 @@
       </div>
     </div>
     <button class="btn btn-primary mr-2" type="button" @click="open">Open bottom sheet</button>
-    <button class="btn btn-primary" type="button" @click="open">Open persistent bottom sheet</button>
+    <button class="btn btn-primary" type="button" @click="open">
+      Open persistent bottom sheet
+    </button>
     <vue-bottom-sheet
       :overlay-click-close="clickToClose"
       :transition-duration="0.5"
@@ -86,6 +86,9 @@
       :overlay-color="overlayColorSelect"
       v-model="myBottomSheet"
     >
+      <template #header>
+        <div class="bottom-sheet__headerx">Thời gian</div>
+      </template>
       <div class="sheet-content">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
@@ -152,6 +155,8 @@
     </vue-bottom-sheet>
 
     <vue-persistent-bottom-sheet
+      :position="position"
+      height="70vh"
       :overlay-click-close="clickToClose2"
       :transition-duration="0.5"
       :max-width="maxWidth2"
@@ -161,60 +166,10 @@
       :overlay-color="overlayColorSelect2"
       ref="myBottomSheet2"
     >
-    <template #header>
-      <div class="bottom-sheet__headerx">Thời gian</div>
-    </template>
+      <template #header>
+        <div class="bottom-sheet__headerx">Thời gian</div>
+      </template>
       <div class="sheet-content">
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
-          Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
-          quos velit veritatis voluptatem?
-        </p>
         <p>
           Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime neque sed tempore ullam.
           Accusamus animi at autem beatae est, hic inventore iste minima, non quibusdam quisquam
@@ -227,6 +182,9 @@
         </p>
         <button type="button" class="btn btn-danger" @click="close">Close</button>
       </div>
+      <template #footer>
+        <div class="bottom-sheet__headerx">Thời gian footer</div>
+      </template>
     </vue-persistent-bottom-sheet>
   </div>
 </template>
@@ -236,7 +194,7 @@ import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 import { onMounted, ref } from 'vue'
 import VueBottomSheet from '@/components/VueBottomSheet.vue'
-import VuePersistentBottomSheet from '@/components/VuePersistentBottomSheet.vue'
+import VuePersistentBottomSheet, { Position } from '@/components/VuePersistentBottomSheet.vue'
 
 const overlay = ref(true)
 const maxWidth = ref(640)
@@ -246,26 +204,29 @@ const overlayColorSelect = ref('#0000004D')
 const canSwipe = ref(true)
 const myBottomSheet = ref<boolean>(false)
 
+setTimeout(() => {
+  position.value = 'hide'
+}, 3000)
 
 const overlay2 = ref(false)
 const maxWidth2 = ref(640)
 const maxHeight2 = ref(640)
+const position = ref<Position>('full')
 const clickToClose2 = ref(true)
 const overlayColorSelect2 = ref('#0000004D')
 const canSwipe2 = ref(true)
 const myBottomSheet2 = ref<InstanceType<typeof VueBottomSheet>>()
 
 const open = () => {
-  myBottomSheet.value = true;
+  myBottomSheet.value = true
 }
 const close = () => {
-  myBottomSheet.value = false;
+  myBottomSheet.value = false
 }
 
 onMounted(() => {
   // open()
   // setTimeout(() => {    console.log('avcxxxx');
-
   //   myBottomSheet.value=false }, 2000)
 })
 </script>
@@ -274,10 +235,10 @@ onMounted(() => {
   padding: 16px;
 }
 
-.bottom-sheet__headerx{
+.bottom-sheet__headerx {
   padding: 8px 16px 16px 16px;
-  font-size: 16px; 
+  font-size: 16px;
   font-weight: bold;
-border-bottom: 1px solid #D9D9D9;
-   }
+  border-bottom: 1px solid #d9d9d9;
+}
 </style>

@@ -37,7 +37,7 @@
 import { computed, onMounted, nextTick, ref, watch } from 'vue'
 import Hammer from 'hammerjs'
 
-type Position = 'hide' | 'middle' | 'full'
+export type Position = 'hide' | 'middle' | 'full'
 /**
  * Bottom sheet props interface
  */
@@ -46,10 +46,11 @@ interface IProps {
   overlayColor?: string
   maxWidth?: number
   maxHeight?: number
+  height?: string
   transitionDuration?: number
   overlayClickClose?: boolean
   canSwipe?: boolean
-  height?: Position
+  position?: Position
   classStyle?: string
 }
 
@@ -73,7 +74,7 @@ const props = withDefaults(defineProps<IProps>(), {
   transitionDuration: 0.5,
   overlayClickClose: true,
   canSwipe: true,
-  height: 'hide'
+  position: 'hide'
 })
 
 /**
@@ -121,17 +122,18 @@ const bottomSheetMain = ref<HTMLElement | null>(null)
 const bottomSheetFooter = ref<HTMLElement | null>(null)
 const bottomSheetContent = ref<HTMLElement | null>(null)
 const bottomSheetDraggableArea = ref<HTMLElement | null>(null)
-const positionElm = ref<Position>(props.height)
+// eslint-disable-next-line vue/no-setup-props-destructure
+const positionElm = ref<Position>(props.position)
 const positionElmHeight = ref<70 | 0 | 30>(70)
 const direction = ref(0)
 
 watch(
-  () => props.height,
+  () => props.position,
   () => {
     showSheet.value = false
     console.log('watching props.height')
     isDragging.value = true
-    positionElm.value = props.height
+    positionElm.value = props.position
     positionToVh(positionElm.value)
     isDragging.value = false
     console.log(translateValue.value)
@@ -179,7 +181,7 @@ const transitionDurationString = computed(() => {
  * Return sheet height string with px
  */
 const sheetHeightString = computed(() => {
-  return sheetHeight.value && sheetHeight.value > 0 ? `${sheetHeight.value + 1}px` : 'auto'
+  return props.height ? `${props.height}` : 'auto'
 })
 
 /**
@@ -529,9 +531,10 @@ onMounted(() => {
   }
 
   &__main {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
     touch-action: auto !important;

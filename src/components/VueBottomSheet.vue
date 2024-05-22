@@ -251,7 +251,7 @@ nextTick(() => {
   /**
    * Create instances of Hammerjs
    */
-  const hammerAreaInstance = new Hammer(bottomSheetDraggableArea.value, {
+  const hammerAreaInstance = new Hammer(bottomSheetHeader.value, {
     inputClass: Hammer.TouchMouseInput,
     recognizers: [[Hammer.Pan, { direction: Hammer.DIRECTION_VERTICAL }]]
   })
@@ -408,9 +408,10 @@ watch(model, () => {
   }
 
   &__main {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
     touch-action: auto !important;
